@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f3f4eb">
+<title>Streats – Digitale menukaart (demo)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800;900&family=Zilla+Slab:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f3f4eb; --ink:#2b2926; --muted:#615e5a; --sage:#a4a698; --line:#e1e2d6;
+    --card:#ffffff; --accent:#c9971c; --accent-deep:#a87b10; --accent-ink:#2b2926; --soft:#e9eadf;
+    --r:16px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  button,a,.item{touch-action:manipulation}
+  html{scroll-behavior:auto}
+  html,body{margin:0;background:#d9dacd;color:var(--ink);
+    font-family:"Archivo",system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  .app{max-width:480px;min-height:100vh;margin:0 auto;background:var(--bg);position:relative;padding-bottom:24px}
+  @media(min-width:520px){.app{box-shadow:0 0 0 1px #c9cabd,0 30px 80px rgba(0,0,0,.18)}}
+
+  /* header */
+  header{padding:22px 20px 14px}
+  .toprow{display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .table-chip{background:var(--ink);color:var(--bg);font-weight:800;font-size:13px;padding:7px 12px;border-radius:999px;letter-spacing:.02em}
+  .langs{display:flex;background:var(--soft);border-radius:999px;padding:3px}
+  .langs button{border:0;background:transparent;font:inherit;font-weight:700;font-size:12px;padding:6px 10px;border-radius:999px;color:var(--muted);cursor:pointer}
+  .langs button:active{opacity:.6}
+  .langs button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+  .brand{margin:26px 0 6px;display:flex;align-items:center;min-height:56px}
+  .brand img{height:52px;width:auto;display:block}
+  .wordmark{display:none;font-family:"Zilla Slab",Georgia,serif;font-weight:700;font-size:50px;letter-spacing:-.01em;line-height:1;color:var(--muted)}
+  .wordmark span{color:var(--sage)}
+  .tagline{font-size:15px;color:var(--muted);margin:6px 0 0;line-height:1.35}
+  .meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  .meta span{font-size:12px;font-weight:600;background:var(--card);border:1px solid var(--line);padding:6px 10px;border-radius:999px}
+
+  /* category nav */
+  nav{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+  .cats{display:flex;gap:6px;overflow-x:auto;padding:10px 16px;scrollbar-width:none}
+  .cats::-webkit-scrollbar{display:none}
+  .cats a{flex:none;text-decoration:none;color:var(--ink);font-weight:700;font-size:14px;padding:9px 14px;border-radius:999px;background:var(--card);border:1px solid var(--line);white-space:nowrap}
+  .cats a:active{opacity:.7}
+  .cats a.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+
+  /* sections */
+  section{padding:22px 16px 4px;scroll-margin-top:60px}
+  h2{font-weight:900;font-size:26px;letter-spacing:-.02em;margin:0 4px 12px;text-transform:uppercase;display:flex;align-items:center;gap:10px}
+  h2::before{content:"";width:6px;height:24px;border-radius:3px;background:var(--accent)}
+  .item{display:flex;gap:14px;background:var(--card);border-radius:var(--r);padding:14px;margin-bottom:10px;border:1px solid var(--line);transition:transform .12s, box-shadow .12s}
+  .item.has-opt{cursor:pointer}
+  .item.has-opt:active{transform:scale(.985)}
+  @media(hover:hover){.item.has-opt:hover{box-shadow:0 4px 14px rgba(0,0,0,.06)}}
+  .item .txt{flex:1;min-width:0}
+  .item h3{margin:0;font-size:16px;font-weight:800;line-height:1.2}
+  .item p{margin:5px 0 0;font-size:13px;color:var(--muted);line-height:1.4}
+  .item .row{display:flex;align-items:center;gap:8px;margin-top:9px}
+  .price{font-weight:800;font-size:15px;color:var(--accent-deep)}
+  .ask{font-weight:700;font-size:13px;color:var(--muted)}
+  .badge{font-size:10px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;background:var(--accent);color:var(--accent-ink);padding:3px 7px;border-radius:6px}
+  .badge.veg{background:var(--sage);color:#fff}
+  .more{font-size:12px;font-weight:800;color:var(--accent-ink);margin-left:auto;background:var(--soft);padding:5px 10px;border-radius:999px;white-space:nowrap}
+  .thumb{flex:none;width:84px;height:84px;border-radius:12px;align-self:center;
+    background:repeating-linear-gradient(135deg,#efefe6 0 8px,#e6e7dc 8px 16px);
+    display:flex;align-items:center;justify-content:center;flex-direction:column;color:#a3a497;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+  .thumb b{font-size:20px;line-height:1;margin-bottom:4px}
+  .plus{flex:none;width:30px;height:30px;border-radius:50%;background:var(--ink);color:#fff;border:0;font-size:20px;font-weight:700;line-height:30px;margin-left:auto;cursor:pointer}
+
+  footer{text-align:center;font-size:12px;color:var(--muted);padding:26px 20px 10px;line-height:1.6}
+  footer a{color:inherit}
+
+
+  /* sheets */
+  .scrim{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:30;opacity:0;pointer-events:none;transition:opacity .2s}
+  .scrim.show{opacity:1;pointer-events:auto}
+  .sheet{position:fixed;left:50%;bottom:0;transform:translate(-50%,100%);width:100%;max-width:480px;max-height:88vh;overflow:auto;
+    background:var(--bg);border-radius:22px 22px 0 0;z-index:31;transition:transform .25s ease;padding:10px 20px 24px}
+  .sheet.show{transform:translate(-50%,0)}
+  .grab{width:40px;height:5px;background:#c9cabd;border-radius:9px;margin:4px auto 14px}
+  .sheet h3{font-size:22px;font-weight:900;margin:0 0 6px;letter-spacing:-.01em}
+  .sheet .desc{color:var(--muted);font-size:14px;line-height:1.45;margin:0 0 14px}
+  .grp{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:12px}
+  .grp .gt{font-weight:800;font-size:14px;margin-bottom:8px;display:flex;justify-content:space-between}
+  .grp .gt small{font-weight:700;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+  .opt{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid #f0f0e8;font-size:15px;cursor:pointer}
+  .opt:first-of-type{border-top:0}
+  .opt .dot{width:7px;height:7px;border-radius:50%;background:var(--accent)}
+  .opt .op{margin-left:auto;color:var(--muted);font-weight:700;font-size:14px}
+  .qty{display:flex;align-items:center;gap:14px}
+  .qty button{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--card);font-size:20px;font-weight:800;cursor:pointer}
+  .qty b{font-size:18px;min-width:18px;text-align:center}
+  .cta{display:flex;gap:12px;align-items:center;margin-top:16px}
+  .btn{flex:1;border:0;background:var(--ink);color:#fff;font:inherit;font-weight:800;font-size:16px;padding:16px;border-radius:14px;cursor:pointer}
+  .btn.accent{background:var(--accent)}
+  .btn:disabled{opacity:.4}
+  .line{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--line)}
+  .line .ln{flex:1}
+  .line .ln b{display:block;font-size:15px}
+  .line .ln small{color:var(--muted);font-size:13px}
+  .line .qty button{width:30px;height:30px;font-size:16px}
+  textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;font:inherit;font-size:14px;margin-top:14px;resize:none;background:var(--card)}
+  .total{display:flex;justify-content:space-between;font-weight:900;font-size:18px;margin-top:14px}
+  .done{text-align:center;padding:18px 4px 6px}
+  .done .ok{width:64px;height:64px;border-radius:50%;background:#2f7d32;color:#fff;font-size:34px;line-height:64px;margin:0 auto 14px}
+  .demo-ribbon{background:var(--accent);color:var(--accent-ink);text-align:center;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:7px}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="demo-ribbon" id="ribbon">Demo · Ishrak QR Menu</div>
+  <header>
+    <div class="toprow">
+      <div class="table-chip" id="tableChip">Menu</div>
+      <div class="langs" id="langs">
+        <button type="button" data-l="nl" class="on">NL</button><button type="button" data-l="en">EN</button><button type="button" data-l="fr">FR</button>
+      </div>
+    </div>
+    <div class="brand">
+      <img src="https://streats.be/images/straet-logo.svg" alt="Streats" onerror="this.style.display='none';document.getElementById('wm').style.display='block'">
+      <div class="wordmark" id="wm"><span>str</span>eats.</div>
+    </div>
+    <p class="tagline">Where the flavours of the streats meet your eats.</p>
+    <div class="meta">
+      <span>📍 Abdijstraat 158, Antwerpen</span>
+      <a href="https://www.instagram.com/streats.be/" target="_blank" rel="noopener" style="text-decoration:none;color:inherit"><span>📸 @streats.be</span></a>
+    </div>
+  </header>
+
+  <nav><div class="cats" id="cats"></div></nav>
+  <main id="menu"></main>
+
+  <footer>
+    <div id="tAllergen">Allergieën? Vraag het aan ons team.</div>
+    <div>Streats · Abdijstraat 158, 2020 Antwerpen · <a href="https://www.instagram.com/streats.be/" target="_blank" rel="noopener">@streats.be</a></div>
+    <div style="margin-top:8px;opacity:.8">Powered by Ishrak Studio</div>
+  </footer>
+</div>
+
+
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet"></div>
+
+<script>
+const T = {
+  nl:{menu:"Menukaart",ask:"Vraag ernaar",allergen:"Allergieën? Vraag het aan ons team.",photo:"foto",
+      choices:"Keuzes & extra's",more:"Opties",close:"Sluiten",ribbon:"Demo · Ishrak QR Menu",free:"inbegrepen"},
+  en:{menu:"Menu",ask:"Ask us",allergen:"Allergies? Just ask our team.",photo:"photo",
+      choices:"Choices & extras",more:"Options",close:"Close",ribbon:"Demo · Ishrak QR Menu",free:"included"},
+  fr:{menu:"Carte",ask:"Demandez-nous",allergen:"Allergies ? Demandez à notre équipe.",photo:"photo",
+      choices:"Choix & suppléments",more:"Options",close:"Fermer",ribbon:"Démo · Ishrak QR Menu",free:"inclus"}
+};
+
+const L = (nl,en,fr)=>({nl,en,fr});
+const PROTEIN = {id:"prot",label:L("Kies je vlees","Choose your meat","Choisissez la viande"),type:"radio",required:true,
+  choices:[{l:L("Kip","Chicken","Poulet"),p:0},{l:L("Vlees","Meat","Viande"),p:0}]};
+const DIP = {id:"dip",label:L("Add your dip","Add your dip","Add your dip"),type:"radio",required:false,
+  choices:[{l:L("Geen","None","Aucun"),p:0},{l:L("Cheesy dip","Cheesy dip","Cheesy dip"),p:2},{l:L("Spiced gravy","Spiced gravy","Spiced gravy"),p:2}]};
+const DOUBLE = {id:"dbl",label:L("Double the dose","Double the dose","Double the dose"),type:"check",required:false,
+  choices:[{l:L("Extra smashburger + saus","Extra smash burger + sauce","Smashburger + sauce en plus"),p:7}]};
+
+const MENU = [
+ {id:"little",name:"Little Eats",items:[
+   {n:"Chicken Taco",d:L("2 stuks","2 pieces","2 pièces"),p:9.50},
+   {n:"Spiced Lambchops",p:8.99},
+   {n:"Dynamite Shrimps",p:8.99},
+   {n:"Chicken Lollipops",p:7.99},
+   {n:"Hotwings",p:7.50},
+   {n:"Sticky Honey BBQ Wings",p:7.50}
+ ]},
+ {id:"sandwich",name:"Streats Sandwich",items:[
+   {n:"Signature Streats Bocadillo",p:11.99,
+    d:L("Brood met vlees naar keuze, salade, frietjes, smoky onions en saus.","Bread with your choice of meat, salad, fries, smoky onions and sauce.","Pain avec viande au choix, salade, frites, oignons fumés et sauce."),
+    o:[{id:"meat",label:L("Kies je vlees","Choose your meat","Choisissez la viande"),type:"radio",required:true,
+        choices:[{l:L("Kip","Chicken","Poulet"),p:0},{l:L("Rund","Beef","Bœuf"),p:0},{l:L("Kefta","Kefta","Kefta"),p:0},{l:L("Veggie","Veggie","Végé"),p:0}]},
+       {id:"cheese",label:L("Extra","Extra","Supplément"),type:"check",required:false,choices:[{l:L("Kaas","Cheese","Fromage"),p:1}]}]}
+ ]},
+ {id:"share",name:"Share & Dip",items:[
+   {n:"Tartufo",p:16.90,o:[DOUBLE],
+    d:L("Dubbele smashburger met gesmolten kaas, gekarameliseerde ui, truffelmayo en BBQ-saus op romige tartufo-saus. Met frietjes, Parmezaan en peterselie.",
+        "Double smash burger with melted cheese, caramelised onion, truffle mayo and BBQ sauce on a creamy tartufo sauce. With fries, Parmesan and parsley.",
+        "Double smashburger, fromage fondu, oignon caramélisé, mayo truffe et sauce BBQ sur une sauce tartufo crémeuse. Avec frites, parmesan et persil.")},
+   {n:"The Pepper",p:16.90,new:true,o:[DOUBLE],
+    d:L("Zoals de Tartufo, maar op een romige pepersaus.","Same build as the Tartufo, on a creamy pepper sauce.","Comme le Tartufo, mais sur une sauce poivre crémeuse.")}
+ ]},
+ {id:"burgers",name:"Burgers",items:[
+   {n:"Bang Bang Shrimp Burger",p:15.50,o:[DIP],d:L("Dynamite shrimps, coleslaw, ui, jalapeños, dynamite saus.","Dynamite shrimps, coleslaw, onions, jalapeños, dynamite sauce.","Crevettes dynamite, coleslaw, oignons, jalapeños, sauce dynamite.")},
+   {n:"BBQ Burger",p:13.50,o:[PROTEIN,DIP],d:L("Gegrilde kip of vlees, bacon, smoky onions, kaas, BBQ- en Streats-saus.","Grilled chicken or meat, bacon, smoky onions, cheese, BBQ and Streats sauce.","Poulet ou viande grillé(e), bacon, oignons fumés, fromage, sauce BBQ et Streats.")},
+   {n:"The Mexican Burger",p:13.50,o:[PROTEIN,DIP],d:L("Gefrituurde kip of vlees, pikante guacamole, kaas, rode ui, jalapeños, Streats-saus, Mexicaanse salsa.","Fried chicken or meat, spiced guacamole, cheese, red onions, jalapeños, Streats sauce, Mexican salsa.","Poulet ou viande frit(e), guacamole épicé, fromage, oignons rouges, jalapeños, sauce Streats, salsa mexicaine.")},
+   {n:"Classic Smashburger",p:12.50,o:[DIP],d:L("Dubbele smashed patty, kaas, ui, Streats-saus.","Double smashed patty, cheese, onions, Streats sauce.","Double steak smashé, fromage, oignons, sauce Streats.")},
+   {n:"Truffle Smash",p:null,new:true,o:[DIP],d:L("Twee patties, sla, gekarameliseerde ui, cheddar, truffelmayo, Streats-saus.","Two patties, lettuce, caramelised onion, cheddar, truffle mayo, Streats sauce.","Deux steaks, salade, oignon caramélisé, cheddar, mayo truffe, sauce Streats.")},
+   {n:"Dynamite Streats Burger",p:14.50,o:[DIP],d:L("Kip, ui, jalapeño, dynamite saus.","Chicken, onions, jalapeño, dynamite sauce.","Poulet, oignons, jalapeño, sauce dynamite.")},
+   {n:"Dynamite Veggie Burger",p:13.50,veg:true,o:[DIP],d:L("Aubergine, ui, jalapeño, dynamite saus.","Aubergine, onions, jalapeño, dynamite sauce.","Aubergine, oignons, jalapeño, sauce dynamite.")},
+   {n:"Junior Burger",p:6.90,o:[DIP],d:L("Eén patty, kaas, Streats-saus.","One patty, cheese, Streats sauce.","Un steak, fromage, sauce Streats.")}
+ ]},
+ {id:"fries",name:"Loaded Fries",items:[
+   {n:"Stoof 'n Fries",p:15.50},
+   {n:"Chicken Tartufo",p:15.50},
+   {n:"Steak Tartufo",p:16.50},
+   {n:"Dynamite Shrimps",p:16.50},
+   {n:"Dynamite Chicken",p:14.50},
+   {n:"The Pepper Steak",p:16.50,new:true,d:L("Malse steak, romige pepersaus, Parmezaan, peterselie, mayo.","Tender steak, creamy pepper sauce, Parmesan, parsley, mayo drizzle.","Steak tendre, sauce poivre crémeuse, parmesan, persil, filet de mayo.")},
+   {n:"The Pepper Chicken",p:15.50,new:true,d:L("Kip, romige pepersaus, Parmezaan, peterselie, mayo.","Chicken, creamy pepper sauce, Parmesan, parsley, mayo drizzle.","Poulet, sauce poivre crémeuse, parmesan, persil, filet de mayo.")},
+   {n:"Cheesy Fries",p:4.50}
+ ]},
+ {id:"dessert",name:"Desserts",items:[
+   {n:L("Dessert van de dag","Dessert of the day","Dessert du jour"),p:null}
+ ]},
+ {id:"drinks",name:L("Dranken","Drinks","Boissons"),items:[
+   {n:L("Frisdrank","Soft drink","Boisson fraîche"),p:2.90,d:L("Alle dranken €2,90","All drinks €2.90","Toutes les boissons 2,90 €")}
+ ]}
+];
+
+let lang = "nl";
+const $ = s=>document.querySelector(s);
+const tx = v => (v && typeof v==="object") ? v[lang] : (v||"");
+const eur = n => "€" + n.toFixed(2).replace(".",",");
+function initials(name){return tx(name).split(/\s+/).filter(w=>/^[A-Za-z]/.test(w)).slice(0,2).map(w=>w[0]).join("").toUpperCase();}
+const NEW = {nl:"Nieuw",en:"New",fr:"Nouveau"};
+
+let activeId = MENU[0].id, lockSpy = 0;
+const navH = ()=>document.querySelector("nav").offsetHeight;
+
+function render(){
+  // remember where the reader is, so a language switch doesn't jump to the top
+  const anchor = document.getElementById(activeId);
+  const delta = anchor ? anchor.getBoundingClientRect().top : null;
+
+  document.documentElement.lang = lang;
+  const t = T[lang];
+  $("#tableChip").textContent = t.menu;
+  $("#tAllergen").textContent = t.allergen; $("#ribbon").textContent = t.ribbon;
+  document.querySelectorAll("#langs button").forEach(b=>b.classList.toggle("on",b.dataset.l===lang));
+  $("#cats").innerHTML = MENU.map(c=>`<a href="#${c.id}" data-id="${c.id}">${tx(c.name)}</a>`).join("");
+  $("#menu").innerHTML = MENU.map(c=>`
+    <section id="${c.id}"><h2>${tx(c.name)}</h2>
+      ${c.items.map((it,i)=>`
+        <div class="item${it.o?' has-opt':''}" data-c="${c.id}" data-i="${i}" ${it.o?'role="button" tabindex="0"':''}>
+          <div class="txt">
+            <h3>${tx(it.n)}</h3>
+            ${it.d?`<p>${tx(it.d)}</p>`:""}
+            <div class="row">
+              ${it.p!=null?`<span class="price">${eur(it.p)}</span>`:`<span class="ask">${t.ask}</span>`}
+              ${it.new?`<span class="badge">${NEW[lang]}</span>`:""}
+              ${it.veg?`<span class="badge veg">Veggie</span>`:""}
+              ${it.o?`<span class="more">${t.more} ›</span>`:""}
+            </div>
+          </div>
+          <div class="thumb"><b>${initials(it.n)}</b>${t.photo}</div>
+        </div>`).join("")}
+    </section>`).join("");
+
+  if(delta!==null){
+    const el = document.getElementById(activeId);
+    window.scrollTo({top: el.getBoundingClientRect().top + scrollY - delta, behavior:"instant"});
+  }
+  setActive(activeId);
+}
+
+function setActive(id){
+  activeId = id;
+  const cats = $("#cats");
+  cats.querySelectorAll("a").forEach(a=>{
+    const on = a.dataset.id===id; a.classList.toggle("on",on);
+    if(on){ // scroll the chip row only horizontally (never the page)
+      const left = a.offsetLeft - (cats.clientWidth - a.offsetWidth)/2;
+      cats.scrollTo({left: Math.max(0,left), behavior:"smooth"});
+    }
+  });
+}
+
+function spy(){
+  if(Date.now() < lockSpy) return;
+  const secs = [...document.querySelectorAll("section")];
+  const line = navH() + 24;
+  let cur = secs[0].id;
+  for(const s of secs){ if(s.getBoundingClientRect().top <= line) cur = s.id; }
+  if(innerHeight + scrollY >= document.documentElement.scrollHeight - 4) cur = secs[secs.length-1].id;
+  if(cur !== activeId) setActive(cur);
+}
+let ticking=false;
+addEventListener("scroll",()=>{ if(!ticking){ ticking=true; requestAnimationFrame(()=>{spy(); ticking=false;}); } },{passive:true});
+
+function goTo(id){
+  const el = document.getElementById(id); if(!el) return;
+  setActive(id);
+  lockSpy = Date.now() + 900;
+  window.scrollTo({top: el.getBoundingClientRect().top + scrollY - navH() + 1, behavior:"smooth"});
+}
+
+function openSheet(html){
+  $("#sheet").innerHTML='<div class="grab"></div>'+html;
+  $("#sheet").classList.add("show");$("#scrim").classList.add("show");
+  document.body.style.overflow="hidden";
+}
+function closeSheet(){
+  $("#sheet").classList.remove("show");$("#scrim").classList.remove("show");
+  document.body.style.overflow="";
+}
+
+function openItem(c,i){
+  const it = MENU.find(x=>x.id===c).items[i]; if(!it.o) return;
+  const t = T[lang];
+  openSheet(`
+    <h3>${tx(it.n)}</h3>
+    <p class="desc">${it.d?tx(it.d)+"<br>":""}<b style="color:var(--accent-deep)">${it.p!=null?eur(it.p):t.ask}</b></p>
+    <div style="font-weight:800;font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:0 2px 8px">${t.choices}</div>
+    ${it.o.map(g=>`
+      <div class="grp"><div class="gt">${tx(g.label)}</div>
+        ${g.choices.filter(ch=>!(g.type==='radio'&&!g.required&&!ch.p)).map(ch=>`
+          <div class="opt"><span class="dot"></span>${tx(ch.l)}<span class="op">${ch.p?"+ "+eur(ch.p):t.free}</span></div>`).join("")}
+      </div>`).join("")}
+    <div class="cta"><button type="button" class="btn" id="closeBtn">${t.close}</button></div>`);
+  $("#closeBtn").onclick=closeSheet;
+}
+
+document.addEventListener("click",e=>{
+  const cat=e.target.closest("#cats a"); if(cat){e.preventDefault(); goTo(cat.dataset.id); return;}
+  const lb=e.target.closest("#langs button"); if(lb){ if(lb.dataset.l!==lang){lang=lb.dataset.l; render();} return;}
+  const item=e.target.closest(".item.has-opt"); if(item){openItem(item.dataset.c,+item.dataset.i);return;}
+});
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape") closeSheet();
+  if((e.key==="Enter"||e.key===" ") && e.target.classList && e.target.classList.contains("has-opt")){e.preventDefault(); e.target.click();}
+});
+$("#scrim").onclick=closeSheet;
+
+render();
+</script>
+</body>
+</html>
